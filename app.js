@@ -191,6 +191,12 @@
   };
 
   const narrow = window.matchMedia("(max-width: 800px)");
+  // Keep the sticky overview bar right under the header, whatever height the header wraps to.
+  let headH = 0;
+  function syncHead() {
+    const h = document.querySelector(".top").offsetHeight;
+    if (h !== headH) document.documentElement.style.setProperty("--head-h", `${(headH = h)}px`);
+  }
 
   const MODES = {
     canon: {
@@ -360,6 +366,7 @@
   let scrollQueued = false;
   function updatePosition() {
     scrollQueued = false;
+    syncHead();
     if (!overview.length) return;
     const M = MODES[state.view];
     const line = $(".top").offsetHeight + $("#canon-head").offsetHeight + 10;
@@ -422,13 +429,10 @@
     yearRows = [...tl.querySelectorAll(".trow[data-year]")];
     updatePosition();
 
-    const nEvents = tl.querySelectorAll(".card").length;
     $(".drawer-close").textContent = entries.length ? `Show ${entries.length} ${entries.length === 1 ? "story" : "stories"}` : "No matches";
-    $("#count").textContent = entries.length
-      ? state.view === "canon"
-        ? `${entries.length} stories, ${nEvents} points in time (${tl.querySelectorAll(".card.approx").length} with approximate years)`
-        : `${entries.length} stories, in broadcast order`
-      : "Nothing matches these filters.";
+    // Only speak up when the filters leave nothing to show.
+    $("#count").hidden = entries.length > 0;
+    $("#count").textContent = entries.length ? "" : "Nothing matches these filters.";
 
     document.querySelectorAll(".view-toggle button").forEach((b) =>
       b.setAttribute("aria-selected", b.dataset.view === state.view));
@@ -597,6 +601,9 @@
       setDrawer(!document.body.classList.contains("filters-open"))));
     narrow.addEventListener("change", () => { if (!narrow.matches) setDrawer(false); drawLinks(); });
     $(".to-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    syncHead();
+    new ResizeObserver(syncHead).observe($(".top"), { box: "border-box" });
+    window.addEventListener("resize", syncHead);
     // The footer's credit line also appears at the end of the drawer, where phones have room for it.
     $(".filters").append(Object.assign($("footer .credit").cloneNode(true), { className: "credit drawer-credit" }));
 

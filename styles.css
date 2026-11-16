@@ -53,7 +53,7 @@ button, input { font: inherit; color: inherit; letter-spacing: inherit; }
   column-gap: var(--gap);
   padding: 8px 8px 0;
 }
-.top { position: sticky; top: 0; z-index: 20; height: var(--head-h); background: #000; }
+.top { position: sticky; top: 0; z-index: 20; height: 92px; background: #000; }
 /* The footer stays pinned to the bottom of the window. */
 footer {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
@@ -412,34 +412,34 @@ svg.links { position: absolute; inset: 0; pointer-events: none; z-index: 5; over
 .foot-buttons, .drawer-close, .drawer-credit, .scrim { display: none; }
 
 @media (max-width: 800px) {
-  :root { --side: 58px; --year-col: 56px; --head-h: 0px; --foot-h: 64px; --bar: 18px; }
+  :root { --side: 58px; --year-col: 56px; --foot-h: 64px; --bar: 18px; }
   body { font-size: 14px; }
 
-  /* Header scrolls away; the overview bar sticks to the top instead. */
-  .top { position: static; height: auto; padding: 6px 6px 0; }
+  /* Header stays put, kept to three short lines. */
+  .top { height: auto; padding: 6px 6px 0; }
   .elbow { border-top-left-radius: 40px 34px; padding: 0; }
   .elbow .code { display: none; }
   .top .frame-main::before { width: 22px; height: 22px; background: radial-gradient(circle at 100% 100%, transparent 21px, var(--l-orange) 22px); }
   .seg.s-lilac { width: 50px; } .seg.s-peach { width: 26px; border-radius: 0 9px 9px 0; }
-  .top-row { flex-wrap: wrap; gap: 6px; padding: 6px 0 8px 16px; }
-  .top h1 { order: -1; width: 100%; margin: 0; font-size: 22px; }
-  .view-toggle button { height: 30px; padding: 0 12px 4px 14px; font-size: 14px; }
-  #search { flex: 1 1 140px; width: auto; height: 30px; min-width: 0; }
+  .top-row { flex-wrap: wrap; gap: 6px; padding: 4px 0 6px 16px; }
+  .top h1 { order: -1; width: 100%; margin: 0; font-size: 19px; }
+  .view-toggle button { height: 30px; padding: 0 10px 4px 12px; font-size: 14px; }
+  #search { flex: 1 1 80px; width: auto; height: 30px; min-width: 0; padding: 0 10px; }
 
   .layout { grid-template-columns: minmax(0, 1fr); padding: 0 6px var(--foot-h); }
   main { padding: 0 0 20px; }
-  .count { font-size: 12px; margin: 6px 0 4px; }
+  .count { font-size: 12px; margin: 10px 0; }
 
   /* Filters slide in from the left. */
   .filters {
-    position: fixed; z-index: 25; top: 0; left: 0; bottom: var(--foot-h); align-self: stretch;
+    position: fixed; z-index: 25; top: var(--head-h); left: 0; bottom: var(--foot-h); align-self: stretch;
     width: min(330px, 88vw); max-height: none; padding: 8px 8px 24px; background: #000;
     transform: translateX(-102%); transition: transform 0.2s ease-out; visibility: hidden;
     box-shadow: 12px 0 30px rgba(0, 0, 0, 0.7);
   }
   .filters-open .filters { transform: none; visibility: visible; }
   .filters-open { overflow: hidden; }
-  .scrim { display: block; position: fixed; z-index: 24; inset: 0 0 var(--foot-h); background: rgba(0, 0, 0, 0.6); }
+  .scrim { display: block; position: fixed; z-index: 24; inset: var(--head-h) 0 var(--foot-h); background: rgba(0, 0, 0, 0.6); }
   .scrim[hidden] { display: none; }
   .drawer-close {
     display: flex; align-items: flex-end; justify-content: flex-end; flex: none;
@@ -466,7 +466,7 @@ svg.links { position: absolute; inset: 0; pointer-events: none; z-index: 5; over
   .foot-buttons .to-top { border-radius: 15px 0 0 15px; }
 
   /* Overview: segments keep a readable width and the bar scrolls sideways. */
-  #canon-head { top: 0; padding: 6px 0 6px; }
+  #canon-head { padding: 6px 0 6px; }
   .ov-bar { height: 38px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
   .ov-bar::-webkit-scrollbar { display: none; }
   .ov-seg { min-width: 40px; flex-shrink: 0; flex-basis: 40px; }

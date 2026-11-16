@@ -100,6 +100,20 @@ def plain_years(text):
     return years, flash
 
 
+MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December"
+CAL = re.compile(r"(?:(\d{1,2})(?:st|nd|rd|th)? (%s)|(%s) (\d{1,2})(?:st|nd|rd|th)?\b|(%s),? \d{4})" % (MONTHS, MONTHS, MONTHS))
+
+
+def calendar(text):
+    """On-screen calendar date as "Apr 16" or "Nov", for eras without stardates."""
+    m = CAL.search(text)
+    if not m:
+        return None
+    day = m.group(1) or m.group(4)
+    month = (m.group(2) or m.group(3) or m.group(5))[:3]
+    return f"{month} {int(day)}" if day else month
+
+
 def memory_alpha(sidebar):
     f = split_fields(sidebar)
     date_raw, other_raw = f.get("date", ""), f.get("other date", "")
@@ -109,7 +123,8 @@ def memory_alpha(sidebar):
     others = sorted(others | {y for y, dec in plain_years(clean(other_raw))[0] if not dec})
     # Stardate: a leading number that is not a linked year, e.g. "41153.7-41174.2 ([[2364]])".
     no_years = clean(YEAR_LINK.sub("", date_raw)).lstrip(":; ")
-    m = re.match(r"^(\d+(?:\.\d+)?)(?:\s*[-–]\s*(\d+(?:\.\d+)?))?", no_years)
+    # A stardate has a decimal point or at least three digits, and is not a day of the month.
+    m = re.match(r"^(\d+\.\d+|\d{3,})(?:\s*[-–]\s*(\d+(?:\.\d+)?))?(?!\s*(?:%s))" % MONTHS, no_years)
     stardate = None
     if m:
         stardate = m.group(1) + (f"–{m.group(2)}" if m.group(2) else "")
@@ -119,6 +134,7 @@ def memory_alpha(sidebar):
         "years": years,
         "others": others,
         "date": clean(date_raw).lstrip(":; ").replace("( ", "("),
+        "cal": calendar(clean(date_raw)),
         "other": clean(other_raw),
     }
 
@@ -187,7 +203,7 @@ def main():
                 "events": events,
             }
             if info:
-                entry["ma"] = {k: info[k] for k in ("page", "stardate", "date", "other", "others") if info[k]}
+                entry["ma"] = {k: info[k] for k in ("page", "stardate", "date", "cal", "other", "others") if info[k]}
                 # In-year sort key: stardate, or the on-screen calendar date.
                 if info["sd"] is not None:
                     entry["order"] = info["sd"]

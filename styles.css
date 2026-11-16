@@ -276,7 +276,17 @@ svg.links { position: absolute; inset: 0; pointer-events: none; z-index: 5; over
   align-self: center; text-align: right; font-size: 20px; font-weight: 600; line-height: 1;
   color: var(--l-orange); font-variant-numeric: tabular-nums;
 }
-.trow.new-year .tyear { padding-top: 8px; }
+.trow.new-year .tyear, .trow.new-year .tdate { padding-top: 8px; }
+.tdate {
+  align-self: center; display: flex; flex-direction: column; align-items: flex-end;
+  line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.tdate .sd { font-size: 17px; font-weight: 600; color: var(--l-peach); letter-spacing: 0.03em; }
+.tdate.cal .sd { color: var(--l-blue); text-transform: uppercase; }
+.tdate.none .sd { color: #3c3c4c; }
+.tdate .yr { font-size: 12px; color: #6c6c80; letter-spacing: 0.08em; }
+.tdate.first .yr { font-size: 15px; font-weight: 600; color: var(--l-orange); }
+.tdate.approx .yr { color: var(--approx); font-style: italic; }
 .tyear.repeat { font-size: 14px; font-weight: 400; color: #5c5c70; }
 .tyear small { display: block; margin-top: 3px; font-size: 11px; font-weight: 400; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
 .rails { display: flex; align-self: stretch; }

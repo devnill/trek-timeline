@@ -154,9 +154,7 @@
         el("span", { class: "card-title" }, entry.title),
         tag ? el("span", { class: `branch tl-${ev.tl}` }, tag) : null,
         ev.approx ? approxBadge(ev) : null,
-        el("span", { class: "card-meta" }, [
-          ev.kind === "home" && stardateOf(entry) ? `SD ${stardateOf(entry)}` : null,
-          epCode(entry), `Aired ${fmtAir(entry.air)}`].filter(Boolean).join(" · "))),
+        el("span", { class: "card-meta" }, [epCode(entry), `Aired ${fmtAir(entry.air)}`].filter(Boolean).join(" · "))),
       ev.note ? el("div", { class: "card-note" }, ev.note) : null);
   }
 
@@ -245,9 +243,19 @@
       }
       const approx = yearApprox.get(r.y);
       const label = mode === "air" && !first ? r.dateLabel : fmtYear(r.y, approx);
+      // In-universe: stardate on top, year underneath. Air date: year, then month and day.
+      const dateCell = mode === "canon"
+        ? el("div", {
+          class: `tdate${first ? " first" : ""}${approx ? " approx" : ""}${r.sd ? "" : r.cal ? " cal" : " none"}`,
+          title: [r.sd && `Stardate ${r.sd}`, !r.sd && r.cal && `Date: ${r.cal}`, !r.sd && !r.cal && "No stardate given",
+            approx && "Approximate year"].filter(Boolean).join(" · "),
+        },
+          el("span", { class: "sd" }, r.sd ? r.sd.split(/[–-]/)[0] : r.cal || "—"),
+          el("span", { class: "yr" }, fmtYear(r.y, approx)))
+        : el("div", { class: `tyear${approx ? " approx" : ""}${first ? "" : " repeat"}`, title: approx ? "Approximate year" : null },
+          label, first && approx ? el("small", {}, "approx.") : null);
       out.push(el("div", { class: `trow${first ? " new-year" : ""}`, "data-year": first ? r.y : null },
-        el("div", { class: `tyear${approx ? " approx" : ""}${first ? "" : " repeat"}`, title: approx ? "Approximate year" : null },
-          label, first && approx ? el("small", {}, "approx.") : null),
+        dateCell,
         rails(i, false),
         r.node));
       prev = r.y;
@@ -261,7 +269,10 @@
     for (const entry of entries) {
       entry.events.forEach((ev, idx) => {
         if (!eventVisible(ev)) return;
+        // Stardates (or on-screen calendar dates) describe a story's main setting only.
+        const home = ev.kind === "home";
         rows.push({ y: ev.y, at: ev.y, lane: ev.tl, kind: ev.kind, approx: ev.approx, entry,
+          sd: home ? stardateOf(entry) : null, cal: home ? entry.ma?.cal : null,
           key: ev.kind === "home" && entry.order != null ? entry.order : Infinity,
           node: canonCard(entry, ev, idx) });
       });

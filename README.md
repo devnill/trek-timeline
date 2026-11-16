@@ -17,8 +17,12 @@ Then open http://localhost:8743.
 - `episodes.js` is generated: every episode with its season, number and first air date
   from Wikipedia's episode lists, plus the stardate and year from each episode's
   Memory Alpha page. Years Memory Alpha lists under "other date" (flashbacks, time
-  travel) become extra points. Where Memory Alpha gives no year, it is estimated from the
-  season (shown as "c. 2367"). Within a year, stories are ordered by stardate.
+  travel) become extra points. Where Memory Alpha gives no year, the year is estimated
+  from a 24th-century stardate (41000 ≈ 2364, about 1,000 a year) or from the episodes
+  around it. Within a year, stories are ordered by stardate.
+- Every approximate year carries a reason (`why`) that the app shows. `est: true` marks our
+  own estimates ("≈ estimate"); other approximate years come from vague sources, such as
+  a decade ("≈ approx.").
 - `data.js` is hand-written: series colors, timelines, films, and curated entries that
   replace an episode's placement with a summary, exact years, time travel and alternate
   timelines. Entries are matched to episodes by series and title.

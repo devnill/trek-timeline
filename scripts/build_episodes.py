@@ -28,8 +28,9 @@ SEASONS = {
     "PIC": {1: (2399, 2399), 2: (2401, 2401), 3: (2401, 2401)},
     "LD":  {1: (2380, 2380), 2: (2381, 2381), 3: (2381, 2381), 4: (2381, 2381), 5: (2381, 2382)},
     "PRO": {1: (2383, 2384), 2: (2384, 2385)},
-    "SNW": {1: (2259, 2259), 2: (2259, 2260), 3: (2260, 2260), 4: (2260, 2261)},
-    "SFA": {1: (3191, 3191)},
+    "SNW": {1: (2259, 2259), 2: (2259, 2259), 3: (2261, 2261), 4: (2262, 2262)},
+    # Memory Alpha dates two episodes to 3196 and the rest only to the "3190s".
+    "SFA": {1: (3196, 3196)},
 }
 
 # Short Treks are standalone stories set all over the timeline.
@@ -81,13 +82,31 @@ def clean(wikitext):
 
 
 YEAR_LINK = re.compile(r"\[\[(\d{3,4})(s)?(?:\|[^\]]*)?\]\]")
+# Unlinked years in cleaned text: "2384", "(2261)", "2250s", but not stardates like "2411.8".
+PLAIN_YEAR = re.compile(r"(?<![\d.])(\d{4})(s)?(?![\d.])(\s*\(flashbacks?\))?")
+CENTURY = re.compile(r"(\d{1,2})(?:st|nd|rd|th) century")
+# 24th-century series use stardates where 41000 began 2364 and each year adds about 1,000.
+SD_SERIES = {"TNG", "DS9", "VOY", "PIC", "LD", "PRO"}
+
+
+def plain_years(text):
+    """Years from unlinked date text: [(year, is_decade_or_century)], flashback years separately."""
+    years, flash = [], []
+    for y, dec, fb in PLAIN_YEAR.findall(text):
+        (flash if fb else years).append((int(y), bool(dec)))
+    if not years:
+        for c in CENTURY.findall(text):
+            years.append(((int(c) - 1) * 100 + 50, True))
+    return years, flash
 
 
 def memory_alpha(sidebar):
     f = split_fields(sidebar)
     date_raw, other_raw = f.get("date", ""), f.get("other date", "")
-    years = [(int(y), bool(dec)) for y, dec in YEAR_LINK.findall(date_raw)]
-    others = sorted({int(y) for y, dec in YEAR_LINK.findall(other_raw) if not dec})
+    # Linked or not, read years from the cleaned text so "(flashback)" years become extra events.
+    years, flash = plain_years(clean(date_raw))
+    others = {int(y) for y, dec in YEAR_LINK.findall(other_raw) if not dec} | {y for y, _ in flash}
+    others = sorted(others | {y for y, dec in plain_years(clean(other_raw))[0] if not dec})
     # Stardate: a leading number that is not a linked year, e.g. "41153.7-41174.2 ([[2364]])".
     no_years = clean(YEAR_LINK.sub("", date_raw)).lstrip(":; ")
     m = re.match(r"^(\d+(?:\.\d+)?)(?:\s*[-–]\s*(\d+(?:\.\d+)?))?", no_years)
@@ -136,16 +155,28 @@ def main():
 
             info = ma.get(f"{series}|{e['title']}")
             ev = dict(est)
+            if est.get("approx"):
+                ev["est"] = True
+                ev["why"] = ("Estimate: Memory Alpha gives no year; placed by its season."
+                             if series != "ST" else "Estimate: Memory Alpha gives no year for this short.")
             if info and info["years"]:
                 y, decade = info["years"][0]
                 ev = {**est, "y": y, "approx": decade}
+                if decade:
+                    ev["why"] = f"Memory Alpha only gives “{info['date']}”."
+            elif info and info["sd"] and series in SD_SERIES and 40000 <= info["sd"] < 70000:
+                y = 2323 + int(info["sd"] // 1000)
+                ev = {**est, "y": y, "approx": True, "est": True,
+                      "why": f"Estimate: worked out from stardate {info['stardate']}. Memory Alpha gives no year; "
+                             "24th-century stardates advance about 1,000 a year (41000 ≈ 2364)."}
                 if y != est["y"]:
                     report.append(f"| {series} | {e['title']} | {est['y']}{' (est.)' if est.get('approx') else ''} | {info['date']} |")
             events = [ev]
             if info:
                 for oy in info["others"]:
                     if oy != ev["y"]:
-                        events.append({"y": oy, "tl": "prime", "kind": "other", "note": f"Memory Alpha: also set in {info['other']}"})
+                        events.append({"y": oy, "tl": "prime", "kind": "other",
+                                       "note": f"Memory Alpha: also set in {info['other']}" if info["other"] else f"Memory Alpha: a flashback to {oy}."})
             entry = {
                 "id": f"{series.lower()}-s{season}e{e['ep']}-{slug(e['title'])}",
                 "series": series,
@@ -166,6 +197,25 @@ def main():
             out.append(entry)
 
     out.sort(key=lambda e: (e["air"], e["series"], e["ep"] or 0))
+
+    # Season-based guesses: use the surrounding episodes' years when they are known.
+    for (series, season), _ in by_season.items():
+        run = [x for x in out if x["series"] == series and x["season"] == season]
+        known = [(i, x["events"][0]["y"]) for i, x in enumerate(run) if not x["events"][0].get("approx")]
+        for i, x in enumerate(run):
+            ev = x["events"][0]
+            if not (ev.get("est") and ev.get("why", "").endswith("placed by its season.")):
+                continue
+            before = [(j, y) for j, y in known if j < i]
+            after = [(j, y) for j, y in known if j > i]
+            near = ([before[-1]] if before else []) + ([after[0]] if after else [])
+            if not near:
+                continue
+            ys = sorted({y for _, y in near})
+            ev["y"] = ys[0]
+            names = " and ".join(f"“{run[j]['title']}”" for j, _ in near)
+            ev["why"] = (f"Estimate: Memory Alpha gives no year, so this uses the year of the episodes around it "
+                         f"({names}, {' and '.join(map(str, ys))}).")
 
     # Episodes without a stardate inherit the previous one in the same series, so they
     # stay beside their broadcast neighbours when a year is sorted by stardate.

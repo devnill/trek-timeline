@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Star Trek Timeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="elbow" aria-hidden="true"><span class="code">LCARS 47</span></div>
+    <div class="frame-main">
+      <div class="bar" aria-hidden="true">
+        <span class="seg grow"></span><span class="seg s-lilac"></span><span class="seg s-peach"></span>
+      </div>
+      <div class="top-row">
+        <div class="view-toggle" role="tablist" aria-label="Order">
+          <button role="tab" data-view="canon" aria-selected="true">In-universe</button>
+          <button role="tab" data-view="air" aria-selected="false">Air date</button>
+        </div>
+        <input id="search" type="search" placeholder="Search titles and notes…" aria-label="Search">
+        <h1>Star Trek Timeline</h1>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="filters" aria-label="Filters">
+      <section>
+        <h2>Series</h2>
+        <div id="series-filters" class="chips"></div>
+        <div class="row-buttons">
+          <button type="button" data-all="series">All</button>
+          <button type="button" data-none="series">None</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Timelines</h2>
+        <div id="timeline-filters" class="checks"></div>
+      </section>
+
+      <section>
+        <h2>Air date</h2>
+        <div class="range">
+          <label>From <input id="air-from" type="number" step="1"></label>
+          <label>To <input id="air-to" type="number" step="1"></label>
+        </div>
+      </section>
+
+      <section>
+        <h2>In-universe year</h2>
+        <div class="range">
+          <label>From <input id="canon-from" type="number" step="1"></label>
+          <label>To <input id="canon-to" type="number" step="1"></label>
+        </div>
+        <p class="hint">Use negative numbers for BCE. Leave blank for no limit.</p>
+      </section>
+
+      <section>
+        <h2>Story type</h2>
+        <label class="check"><input id="travel-only" type="checkbox"> Only stories that span several times or timelines</label>
+        <label class="check"><input id="show-visions" type="checkbox" checked> Include visions and simulations</label>
+      </section>
+
+      <button type="button" id="reset" class="reset">Reset filters</button>
+
+      <section class="legend">
+        <h2>Legend</h2>
+        <ul>
+          <li><span class="kind-icon">●</span> Main setting</li>
+          <li><span class="kind-icon">↶</span> Trip to the past</li>
+          <li><span class="kind-icon">↷</span> Trip to the future</li>
+          <li><span class="kind-icon">◌</span> Vision or simulation</li>
+          <li><span class="kind-icon">⇢</span> Where a visitor came from</li>
+          <li><span class="kind-icon">◇</span> Flashback or other scene</li>
+          <li><span class="approx-badge">≈ approx.</span> Approximate year (“c. 2367”). “est. year” means Memory Alpha gives no year, so it is estimated from the season.</li>
+        </ul>
+        <p class="hint">Click a card to see every point in time that story touches, connected on the timeline.</p>
+      </section>
+    </aside>
+
+    <main>
+      <p id="count" class="count" aria-live="polite"></p>
+      <div id="canon-head" class="lane-head"></div>
+      <div id="timeline" class="timeline"></div>
+    </main>
+  </div>
+
+  <div id="detail" class="detail" hidden>
+    <button type="button" class="close" aria-label="Close">×</button>
+    <div class="detail-body"></div>
+  </div>
+
+  <footer>
+    <div class="elbow bottom" aria-hidden="true"></div>
+    <div class="frame-main">
+      <p>Fan-made reference. Episode lists and air dates come from Wikipedia; stardates and years from Memory Alpha. Years marked “c.” are estimates. Time travel and alternate timelines are curated in <code>data.js</code> and may contain errors.</p>
+      <div class="bar" aria-hidden="true">
+        <span class="seg grow"></span><span class="seg s-blue"></span><span class="seg s-orange"></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="episodes.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

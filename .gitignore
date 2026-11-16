@@ -1,0 +1,10 @@
+# Downloaded and intermediate data; regenerate with the steps in README.md.
+build/
+__pycache__/
+.DS_Store
+
+# Local tooling
+.claude/
+.ideate/
+.ideate-telemetry/
+.ideate.json

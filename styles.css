@@ -19,6 +19,7 @@
 
   --side: 240px;
   --head-h: 92px;
+  --foot-h: 70px;
   --bar: 26px;
   --gap: 5px;
   --year-col: 110px;
@@ -53,7 +54,11 @@ button, input { font: inherit; color: inherit; letter-spacing: inherit; }
   padding: 8px 8px 0;
 }
 .top { position: sticky; top: 0; z-index: 20; height: var(--head-h); background: #000; }
-footer { padding: var(--gap) 8px 8px; margin-top: var(--gap); }
+/* The footer stays pinned to the bottom of the window. */
+footer {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  height: var(--foot-h); padding: var(--gap) 8px 8px; background: #000;
+}
 
 .elbow {
   position: relative; background: var(--l-orange);
@@ -62,7 +67,7 @@ footer { padding: var(--gap) 8px 8px; margin-top: var(--gap); }
   padding: 0 14px 6px 0; color: #000;
 }
 .elbow .code { font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
-.elbow.bottom { border-top-left-radius: 0; border-bottom-left-radius: 64px 54px; background: var(--l-lilac); min-height: 84px; }
+.elbow.bottom { border-top-left-radius: 0; border-bottom-left-radius: 48px 40px; background: var(--l-lilac); }
 
 .frame-main { position: relative; display: flex; flex-direction: column; min-width: 0; }
 .bar { display: flex; gap: var(--gap); height: var(--bar); flex: none; }
@@ -114,18 +119,20 @@ footer .frame-main::before {
 #search::placeholder { color: color-mix(in srgb, var(--l-blue) 55%, #000); }
 #search:focus { outline: none; border-color: var(--l-orange); color: var(--l-orange); }
 
-footer p { margin: 0 0 10px 30px; color: var(--muted); font-size: 13px; max-width: 900px; }
+footer .frame-main { justify-content: flex-end; }
+footer p { margin: 0 0 6px 30px; color: var(--muted); font-size: 12px; line-height: 1.3; max-width: 1000px; }
 footer code { color: var(--l-peach); }
 
 /* ---------- layout ---------- */
-.layout { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); column-gap: var(--gap); padding: var(--gap) 8px 0; }
+.layout { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); column-gap: var(--gap); padding: var(--gap) 8px var(--foot-h); }
 
 /* ---------- sidebar: a column of LCARS blocks ---------- */
 .filters {
   position: sticky; top: var(--head-h); align-self: start;
-  max-height: calc(100vh - var(--head-h)); overflow: auto;
+  /* Fits below the header and scrolls on its own when the window is short. */
+  max-height: calc(100vh - var(--head-h) - var(--foot-h) - var(--gap)); overflow-y: auto; overscroll-behavior: contain;
   display: flex; flex-direction: column; gap: var(--gap);
-  padding-top: var(--gap);
+  padding: var(--gap) 0 24px;
 }
 .filters section { display: flex; flex-direction: column; gap: var(--gap); margin: 0; }
 .filters h2 {
@@ -183,7 +190,8 @@ footer code { color: var(--l-peach); }
 .range input:focus { outline: none; border-color: var(--l-orange); }
 .hint { color: var(--muted); font-size: 13px; margin: 0; padding: 0 0 0 10px; }
 .legend ul { list-style: none; padding: 0 0 0 10px; margin: 0; display: flex; flex-direction: column; gap: 4px; }
-.legend li { display: flex; gap: 8px; color: var(--text); font-size: 14px; }
+.legend li { display: flex; align-items: baseline; gap: 8px; color: var(--text); font-size: 14px; }
+.legend li .approx-badge { flex: none; }
 .kind-icon { width: 14px; flex: none; text-align: center; color: var(--l-orange); }
 .legend { padding-bottom: 12px; }
 
@@ -258,13 +266,18 @@ svg.links { position: absolute; inset: 0; pointer-events: none; z-index: 5; over
   grid-template-columns: var(--year-col) calc(var(--nl) * var(--rail)) minmax(0, 1fr);
   column-gap: 10px;
 }
-.trow > .card { margin: 2px 0; max-width: 980px; }
+/* Every card is at least as tall as one with a description; a lone title line is centered. */
+.trow > .card {
+  margin: 2px 0; max-width: 980px; min-height: 57px;
+  display: flex; flex-direction: column; justify-content: center;
+}
 .trow.new-year > .card { margin-top: 10px; }
 .tyear {
-  text-align: right; padding-top: 10px; font-size: 20px; font-weight: 600; line-height: 1;
+  align-self: center; text-align: right; font-size: 20px; font-weight: 600; line-height: 1;
   color: var(--l-orange); font-variant-numeric: tabular-nums;
 }
-.tyear.repeat { font-size: 14px; font-weight: 400; color: #5c5c70; padding-top: 6px; }
+.trow.new-year .tyear { padding-top: 8px; }
+.tyear.repeat { font-size: 14px; font-weight: 400; color: #5c5c70; }
 .tyear small { display: block; margin-top: 3px; font-size: 11px; font-weight: 400; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
 .rails { display: flex; align-self: stretch; }
 .rail { position: relative; width: var(--rail); flex: none; }
@@ -336,8 +349,8 @@ svg.links { position: absolute; inset: 0; pointer-events: none; z-index: 5; over
 
 /* ---------- detail panel: a small LCARS frame ---------- */
 .detail {
-  position: fixed; right: 16px; bottom: 16px; z-index: 30;
-  width: min(400px, calc(100vw - 32px)); max-height: 72vh; overflow: auto;
+  position: fixed; right: 16px; bottom: calc(var(--foot-h) + 10px); z-index: 30;
+  width: min(400px, calc(100vw - 32px)); max-height: calc(100vh - var(--head-h) - var(--foot-h) - 40px); overflow: auto;
   background: #000; border: 0;
   border-left: 18px solid var(--c); border-top: 18px solid var(--c);
   border-top-left-radius: 46px 40px; border-bottom-left-radius: 18px;
@@ -386,7 +399,7 @@ svg.links { position: absolute; inset: 0; pointer-events: none; z-index: 5; over
   background: color-mix(in srgb, var(--approx) 8%, transparent); }
 
 @media (max-width: 800px) {
-  :root { --side: 90px; --year-col: 64px; --head-h: auto; }
+  :root { --side: 90px; --year-col: 64px; --head-h: auto; --foot-h: 92px; }
   .top { position: static; height: auto; }
   .top-row { flex-wrap: wrap; padding-left: 20px; }
   .top h1 { font-size: 26px; margin-left: 0; order: -1; width: 100%; }

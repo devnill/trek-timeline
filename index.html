@@ -28,7 +28,8 @@
   </header>
 
   <div class="layout">
-    <aside class="filters" aria-label="Filters">
+    <aside class="filters" id="filters" aria-label="Filters">
+      <button type="button" class="drawer-close" data-filters-toggle>Show results</button>
       <section>
         <h2>Series</h2>
         <div id="series-filters" class="chips"></div>
@@ -91,6 +92,8 @@
     </main>
   </div>
 
+  <div class="scrim" data-filters-toggle hidden></div>
+
   <div id="detail" class="detail" hidden>
     <button type="button" class="close" aria-label="Close">×</button>
     <div class="detail-body"></div>
@@ -99,7 +102,11 @@
   <footer>
     <div class="elbow bottom" aria-hidden="true"></div>
     <div class="frame-main">
-      <p>Fan-made reference. Episode lists and air dates come from Wikipedia; stardates and years from Memory Alpha. Years marked “c.” are approximate or estimated; each one says why. Time travel and alternate timelines are curated in <code>data.js</code> and may contain errors.</p>
+      <div class="foot-buttons">
+        <button type="button" class="to-top">Top</button>
+        <button type="button" class="filters-btn" data-filters-toggle aria-controls="filters" aria-expanded="false">Filters</button>
+      </div>
+      <p class="credit">Fan-made reference. Episode lists and air dates come from Wikipedia; stardates and years from Memory Alpha. Years marked “c.” are approximate or estimated; each one says why. Time travel and alternate timelines are curated in <code>data.js</code> and may contain errors.</p>
       <div class="bar" aria-hidden="true">
         <span class="seg grow"></span><span class="seg s-blue"></span><span class="seg s-orange"></span>
       </div>

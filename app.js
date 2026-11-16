@@ -190,6 +190,8 @@
     return d.getFullYear() + (d - new Date(d.getFullYear(), 0, 1)) / 3.16e10;
   };
 
+  const narrow = window.matchMedia("(max-width: 800px)");
+
   const MODES = {
     canon: {
       // Overview segments: whole centuries from 1800 on; everything earlier is grouped.
@@ -372,6 +374,11 @@
       seg.node.classList.toggle("current", here);
       seg.caret.hidden = !here;
       if (here) seg.caret.style.left = `${(seg.pos(current + (state.view === "air" ? 0.5 : 0)) * 100).toFixed(2)}%`;
+      if (here && narrow.matches) {
+        const bar = seg.node.parentElement, n = seg.node;
+        if (n.offsetLeft < bar.scrollLeft || n.offsetLeft + n.offsetWidth > bar.scrollLeft + bar.clientWidth)
+          bar.scrollLeft = n.offsetLeft - (bar.clientWidth - n.offsetWidth) / 2;
+      }
     }
     const readout = $(".ov-readout");
     if (readout && current != null) readout.textContent = `${state.view === "air" ? "Aired" : "Viewing"} ${fmtYear(current)}`;
@@ -416,6 +423,7 @@
     updatePosition();
 
     const nEvents = tl.querySelectorAll(".card").length;
+    $(".drawer-close").textContent = entries.length ? `Show ${entries.length} ${entries.length === 1 ? "story" : "stories"}` : "No matches";
     $("#count").textContent = entries.length
       ? state.view === "canon"
         ? `${entries.length} stories, ${nEvents} points in time (${tl.querySelectorAll(".card.approx").length} with approximate years)`
@@ -464,7 +472,8 @@
       const ev = entry.events[+c.dataset.idx];
       const x1 = hr.right - box.left, y1 = hr.top + hr.height / 2 - box.top;
       const x2 = r.right - box.left, y2 = r.top + r.height / 2 - box.top;
-      const bend = Math.min(260, 30 + Math.abs(y2 - y1) * 0.08);
+      // Phones have only a narrow margin to the right of the cards.
+      const bend = narrow.matches ? 12 : Math.min(260, 30 + Math.abs(y2 - y1) * 0.08);
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("d", `M${x1},${y1} C${x1 + bend},${y1} ${x2 + bend},${y2} ${x2},${y2}`);
       path.setAttribute("class", `link kind-${ev.kind}`);
@@ -576,7 +585,26 @@
     });
 
     $("#detail .close").addEventListener("click", () => select(selected));
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && selected) select(selected); });
+
+    // Phones: the filters live in a drawer opened from the footer.
+    const setDrawer = (open) => {
+      document.body.classList.toggle("filters-open", open);
+      $(".scrim").hidden = !open;
+      $(".filters-btn").setAttribute("aria-expanded", open);
+      $(".filters-btn").textContent = open ? "Close" : "Filters";
+    };
+    document.querySelectorAll("[data-filters-toggle]").forEach((b) => b.addEventListener("click", () =>
+      setDrawer(!document.body.classList.contains("filters-open"))));
+    narrow.addEventListener("change", () => { if (!narrow.matches) setDrawer(false); drawLinks(); });
+    $(".to-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    // The footer's credit line also appears at the end of the drawer, where phones have room for it.
+    $(".filters").append(Object.assign($("footer .credit").cloneNode(true), { className: "credit drawer-credit" }));
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (document.body.classList.contains("filters-open")) setDrawer(false);
+      else if (selected) select(selected);
+    });
     window.addEventListener("resize", drawLinks);
 
     for (const id of ["air-from", "air-to"]) {

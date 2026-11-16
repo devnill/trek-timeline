@@ -408,16 +408,117 @@ svg.links { position: absolute; inset: 0; pointer-events: none; z-index: 5; over
 .approx-note { color: var(--approx); font-size: 14px; border-left: 6px solid var(--approx); border-radius: 6px 0 0 6px; padding: 4px 10px; margin: 8px 0;
   background: color-mix(in srgb, var(--approx) 8%, transparent); }
 
+/* Phone-only controls are hidden on wide screens. */
+.foot-buttons, .drawer-close, .drawer-credit, .scrim { display: none; }
+
 @media (max-width: 800px) {
-  :root { --side: 90px; --year-col: 64px; --head-h: auto; --foot-h: 92px; }
-  .top { position: static; height: auto; }
-  .top-row { flex-wrap: wrap; padding-left: 20px; }
-  .top h1 { font-size: 26px; margin-left: 0; order: -1; width: 100%; }
-  .layout { grid-template-columns: 1fr; }
-  .filters { position: static; max-height: none; }
-  #canon-head { top: 0; }
+  :root { --side: 58px; --year-col: 56px; --head-h: 0px; --foot-h: 64px; --bar: 18px; }
+  body { font-size: 14px; }
+
+  /* Header scrolls away; the overview bar sticks to the top instead. */
+  .top { position: static; height: auto; padding: 6px 6px 0; }
+  .elbow { border-top-left-radius: 40px 34px; padding: 0; }
+  .elbow .code { display: none; }
+  .top .frame-main::before { width: 22px; height: 22px; background: radial-gradient(circle at 100% 100%, transparent 21px, var(--l-orange) 22px); }
+  .seg.s-lilac { width: 50px; } .seg.s-peach { width: 26px; border-radius: 0 9px 9px 0; }
+  .top-row { flex-wrap: wrap; gap: 6px; padding: 6px 0 8px 16px; }
+  .top h1 { order: -1; width: 100%; margin: 0; font-size: 22px; }
+  .view-toggle button { height: 30px; padding: 0 12px 4px 14px; font-size: 14px; }
+  #search { flex: 1 1 140px; width: auto; height: 30px; min-width: 0; }
+
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 0 6px var(--foot-h); }
+  main { padding: 0 0 20px; }
+  .count { font-size: 12px; margin: 6px 0 4px; }
+
+  /* Filters slide in from the left. */
+  .filters {
+    position: fixed; z-index: 25; top: 0; left: 0; bottom: var(--foot-h); align-self: stretch;
+    width: min(330px, 88vw); max-height: none; padding: 8px 8px 24px; background: #000;
+    transform: translateX(-102%); transition: transform 0.2s ease-out; visibility: hidden;
+    box-shadow: 12px 0 30px rgba(0, 0, 0, 0.7);
+  }
+  .filters-open .filters { transform: none; visibility: visible; }
+  .filters-open { overflow: hidden; }
+  .scrim { display: block; position: fixed; z-index: 24; inset: 0 0 var(--foot-h); background: rgba(0, 0, 0, 0.6); }
+  .scrim[hidden] { display: none; }
+  .drawer-close {
+    display: flex; align-items: flex-end; justify-content: flex-end; flex: none;
+    min-height: 40px; padding: 0 14px 5px; border: 0; border-radius: 20px 0 0 20px; cursor: pointer;
+    background: var(--l-orange); color: #000; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .chip, .check { min-height: 34px; }
+  .row-buttons button { min-height: 34px; }
+  .drawer-credit { display: block; margin: 8px 0 0 10px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+  .drawer-credit code { color: var(--l-peach); }
+
+  /* Footer: the credit moves into the drawer; the footer holds the buttons. */
+  footer { padding: var(--gap) 6px 6px; }
+  footer .credit { display: none; }
+  .elbow.bottom { border-bottom-left-radius: 34px 28px; }
+  footer .frame-main::before { width: 22px; height: 22px; background: radial-gradient(circle at 100% 0, transparent 21px, var(--l-lilac) 22px); }
+  footer .seg.s-blue { width: 60px; } footer .seg.s-orange { width: 26px; border-radius: 0 9px 9px 0; }
+  .foot-buttons { display: flex; justify-content: flex-end; gap: var(--gap); margin-bottom: var(--gap); }
+  .foot-buttons button {
+    border: 0; cursor: pointer; height: 30px; padding: 0 16px 4px; display: flex; align-items: flex-end;
+    background: var(--l-blue); color: #000; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .foot-buttons .filters-btn { background: var(--l-orange); border-radius: 0 15px 15px 0; min-width: 92px; justify-content: flex-end; }
+  .foot-buttons .to-top { border-radius: 15px 0 0 15px; }
+
+  /* Overview: segments keep a readable width and the bar scrolls sideways. */
+  #canon-head { top: 0; padding: 6px 0 6px; }
+  .ov-bar { height: 38px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
+  .ov-bar::-webkit-scrollbar { display: none; }
+  .ov-seg { min-width: 40px; flex-shrink: 0; flex-basis: 40px; }
+  .ov-seg:first-child { border-radius: 19px 0 0 19px; }
+  .ov-seg:last-child { border-radius: 0 19px 19px 0; }
+  .ov-label { font-size: 11px; right: 5px; }
+  .ov-seg:first-child .ov-label { left: 12px; }
+  .ov-ticks { left: 5px; right: 5px; height: 14px; }
+  .ov-seg:first-child .ov-ticks { left: 12px; }
+  .ov-seg:last-child .ov-ticks { right: 12px; }
+  .tick { height: 8px; } .tick.side { height: 13px; }
+  .ov-caret { top: -10px; }
+  .ov-foot { flex-wrap: wrap; gap: 2px 10px; font-size: 11px; }
+  .ov-readout { min-width: 0; }
+  .ov-legend { gap: 8px; flex-wrap: wrap; }
+  .ov-legend i { width: 8px; margin-right: 3px; }
   .ov-hint { display: none; }
-  .track-list .card .card-meta { flex-basis: 100%; margin-left: 0; }
-  main { padding-left: 0; }
+
+  /* Track: narrower date column and rails so cards get the width. */
+  .track-list { --rail: 11px; }
+  .trow { column-gap: 5px; }
+  .trow > .card { margin-right: 14px; min-height: 52px; }
+  .rail.on::before { width: 3px; left: calc(50% - 1.5px); }
+  .rail.main.on::before { width: 4px; left: calc(50% - 2px); }
+  .dot { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-width: 2px; }
+  .mode-air { --rail: 4px; }
+  .mode-air .rail.on::before { width: 2px; left: 1px; }
+  .mode-air .dot { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-width: 2px; }
+  .tdate { white-space: normal; text-align: right; }
+  .tdate .sd { font-size: 14px; }
+  .tdate.cal .sd { font-size: 11px; line-height: 1.15; }
+  .tdate .yr { font-size: 11px; letter-spacing: 0.04em; }
+  .tdate.first .yr { font-size: 13px; }
+  .tyear { font-size: 16px; }
+  .tyear.repeat { font-size: 12px; }
+  .era { font-size: 14px; min-height: 24px; margin: 14px 0 6px; padding: 0 12px 2px; }
+  .era-row .era { margin: 12px 0 4px; }
+  .gap { font-size: 11px; }
+
+  .card { padding: 5px 8px 6px 17px; --bar-shadow: inset 8px 0 0 var(--c); border-radius: 12px 4px 4px 12px; }
+  .card.plain { padding: 4px 7px 5px 16px; }
+  .card-title { font-size: 14px; }
+  .card-note { font-size: 13px; }
+  .card-meta { font-size: 12px; }
+  .track-list .card .card-meta { flex-basis: 100%; margin-left: 0; padding-left: 0; white-space: normal; }
+  .track-list .card-note { margin-left: 0; }
+
+  /* Detail panel becomes a sheet above the footer. */
+  .detail {
+    left: 6px; right: 6px; width: auto; bottom: calc(var(--foot-h) + 4px); max-height: 62vh;
+    border-left-width: 12px; border-top-width: 12px; border-top-left-radius: 32px 28px; padding: 10px 12px 14px;
+  }
+  .detail h2 { font-size: 20px; }
 }
 .mode-air .era { background: var(--l-violet); }
